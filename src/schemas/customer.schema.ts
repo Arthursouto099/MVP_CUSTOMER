@@ -1,4 +1,6 @@
 import z from "zod";
+// import { Decimal } from "../../generated/prisma/runtime/library";
+
 
 
 
@@ -8,5 +10,5 @@ export const CustomerSchema = z.object({
     phone: z.string(),
     email: z.email(),
     password: z.string(),
-    plate: z.string().optional()
+    plate: z.string()
 })
