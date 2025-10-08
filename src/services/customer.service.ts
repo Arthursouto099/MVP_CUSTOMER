@@ -15,6 +15,18 @@ const CustomerService = {
         catch(e) {
             throw errorHandlerReturn(e, CustomerError)
         }
+    },
+
+
+    findAllCustomers: async ({page = 1, limit = 10}: {page: number, limit: number}) => {
+        try{
+            const skip = (page - 1) * limit
+
+            return await prisma.customer.findMany({skip: skip, take: limit, orderBy: {createdAt: 'desc'}, include: {services: true}}) ?? []
+        }
+        catch(e) {
+            throw errorHandlerReturn(e, CustomerError)
+        }
     }
 }
 

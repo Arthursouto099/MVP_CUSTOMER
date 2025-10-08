@@ -13,6 +13,16 @@ const CustomerController = {
         catch(e) {
             next(e)
         }
+    },
+
+    FindCustomers: async (req: Request, res: Response, next: NextFunction) => {
+        try{
+            const isCustomers = await CustomerService.findAllCustomers({page: Number(req.query.page ?? 1), limit: Number(req.query.limit ?? 10)})
+            Ok(res, "Customers finded", 200, isCustomers)
+        }
+        catch(e) {
+            next(e)
+        }
     }
 }
 

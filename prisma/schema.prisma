@@ -33,11 +33,11 @@ model Service {
   customer     Customer @relation(fields: [customer_id], references: [id_customer])
   name  String
   description String?
-  type         String
+  service_type         String
   price        Float
   status       String?   // pending, in_progress, done, paid
-  paymentLink  String?
-  createdAt    DateTime @default(now())
+  checkOutDate  DateTime?
+  checkInDate    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
-
+  isPaid Boolean @default(false)
 }
