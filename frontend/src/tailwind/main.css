@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+
+
+/* Variaveis do tailwindcss 
+--> Use IA para ver cores melhores lut!
+
+--> peça sempre pra seguir no modelo @theme da nova versão do tailwind com vite
+
+--> de preferencia mantenha os nomes e troque só as cores
+*/
+
+.perspective {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotateY-180 {
+  transform: rotateY(180deg);
+}
+
+@theme {
+  /* Neutros (base para fundo, bordas e texto) */
+  --color-background: #f9fafb;        /* Muito claro */
+  --color-surface: #ffffff;           /* Branco puro */
+  --color-border: #e5e7eb;            /* Cinza claro */
+  --color-text-primary: #111827;      /* Preto quase puro */
+  --color-text-secondary: #6b7280;    /* Cinza médio */
+  --color-text-muted: #9ca3af;        /* Cinza suave */
+
+  /* Primária (marca principal) */
+  --color-primary: #3b82f6;           /* Azul padrão (tailwind blue-500) */
+  --color-primary-hover: #2563eb;     /* Azul mais escuro */
+  --color-primary-light: #dbeafe;     /* Azul claro */
+  --color-primary-muted: #eff6ff;     /* Azul muito claro */
+
+  /* Secundária (apoio da marca) */
+  --color-secondary: #6366f1;         /* Indigo (tailwind indigo-500) */
+  --color-secondary-hover: #4f46e5;
+  --color-secondary-light: #e0e7ff;
+  --color-secondary-muted: #eef2ff;
+
+  /* Ação / Sucesso / Erro / Aviso */
+  --color-success: #10b981;           /* Verde (tailwind green-500) */
+  --color-success-bg: #ecfdf5;
+
+  --color-error: #ef4444;             /* Vermelho (tailwind red-500) */
+  --color-error-bg: #fef2f2;
+
+  --color-warning: #f59e0b;           /* Amarelo-alaranjado */
+  --color-warning-bg: #fff7ed;
+
+  --color-info: #0ea5e9;              /* Azul claro */
+  --color-info-bg: #e0f2fe;
+
+  /* Destaque e Sombreamento */
+  --color-highlight: #fefce8;         /* Amarelo claro */
+  --color-shadow: rgba(0, 0, 0, 0.05); /* Sombra sutil */
+  --color-transpa: rgba(0, 0, 0, 0.5);
+   --color-transpa2: rgba(0, 0, 0, 0.5);
+}
