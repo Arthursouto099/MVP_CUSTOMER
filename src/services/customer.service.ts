@@ -27,6 +27,28 @@ const CustomerService = {
         catch(e) {
             throw errorHandlerReturn(e, CustomerError)
         }
+    },
+
+
+    updateCustomer: async ({id_customer, data} : {id_customer: string, data: Prisma.CustomerUpdateInput }) => {
+        try{
+            return await prisma.customer.update({where: {id_customer}, data: data})
+
+        }
+
+        catch(e) {
+            throw errorHandlerReturn(e, CustomerError)
+        }
+    },
+
+
+    deleteCustomer: async ({id_customer}: {id_customer: string}) => {
+        try {
+            return await prisma.customer.delete({where: {id_customer}})
+        }   
+        catch(e) {
+            throw errorHandlerReturn(e, CustomerError)
+        }
     }
 }
 

@@ -4,11 +4,12 @@ import Ok from "../utils/ok";
 
 
 
+
 const CustomerController = {
     CreateCustomer: async (req: Request, res: Response, next: NextFunction) => {
         try{
             const createdCustomer = await CustomerService.createCustomer(req.body)
-            Ok(res, "Customer created successfuly", 201, createdCustomer)
+            Ok(res, "Customer created successfully", 201, createdCustomer)
         }
         catch(e) {
             next(e)
@@ -23,7 +24,31 @@ const CustomerController = {
         catch(e) {
             next(e)
         }
+    },
+
+
+    UpdateCustomer: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const isUpdated = await CustomerService.updateCustomer({id_customer: req.params.id_customer, data: req.body})
+            Ok(res, "Customer updated successfully", 200, isUpdated)
+        }
+        catch(e) {
+            next(e)
+        }
+    },
+
+    DeleteCustomer: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const isDeleted = await CustomerService.deleteCustomer({id_customer: req.params.id_customer})
+            Ok(res, "Customer deleted successfully", 200, isDeleted)
+        }
+        catch(e) {
+            next(e)
+        }
     }
+
+
 }
 
 export default CustomerController
+

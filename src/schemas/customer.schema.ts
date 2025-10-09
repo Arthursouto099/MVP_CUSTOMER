@@ -10,5 +10,10 @@ export const CustomerSchema = z.object({
     phone: z.string(),
     email: z.email(),
     password: z.string(),
-    plate: z.string()
+    plate: z.string(),
+    car_model: z.string()
 })
+
+
+
+export const CustomerUpdateSchema = CustomerSchema.partial()
