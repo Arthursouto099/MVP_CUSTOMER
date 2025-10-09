@@ -11,8 +11,12 @@ http://localhost:3000/api/v1
 Retorna todos os clientes cadastrados, incluindo seus serviços associados.
 
 Endpoint
-GET /customer/all
+GET /customer/all?page={page}&limit={limit}
 
+Parâmetros de Query
+Parâmetro	Tipo	Padrão	Descrição
+page	number	1	Página atual dos resultados
+limit	number	10	Quantidade de registros por página
 Exemplo de Resposta
 ```json
 {
@@ -48,7 +52,12 @@ Exemplo de Resposta
 }
 ````
 
-🧾 GET /services/all
+🧾 GET /services/all?page={page}&limit={limit}
+
+Parâmetros de Query
+Parâmetro	Tipo	Padrão	Descrição
+page	number	1	Página atual dos resultados
+limit	number	10	Quantidade de registros por página
 
 Retorna todos os serviços cadastrados, incluindo os dados do cliente vinculado a cada serviço.
 
