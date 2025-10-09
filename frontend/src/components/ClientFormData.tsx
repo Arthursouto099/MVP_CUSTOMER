@@ -1,7 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Customer } from "../api/@customer/customer.type";
+import CustomerHttpActions from "../api/@customer/customer.axios";
+import { toast } from "sonner";
+
 
 // =========================
 // Tipos e Interfaces
@@ -33,12 +37,10 @@ const fetchCliente = async (id: string) => {
   };
 };
 
-const saveCliente = async (data: ClienteFormData, id?: string) => {
-  // Substituir por POST/PUT na sua API real
-  if (id) {
-    console.log("Atualizando cliente", id, data);
-  } else {
-    console.log("Criando novo cliente", data);
+const saveCliente = async (data: Customer, id_customer?: string) => {
+  if (!id_customer) {
+    const save = await CustomerHttpActions.createCustomer({ data })
+    return save
   }
 };
 
@@ -46,54 +48,89 @@ const saveCliente = async (data: ClienteFormData, id?: string) => {
 // Componente ClienteForm
 // =========================
 export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
+  const [name, setName] = useState<string>("")
+  const [phone, setPhone] = useState<string>("")
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+  const [plate, setPlate] = useState<string>("")
+  const [car_model, setCar_model] = useState<string>("")
+
   const { id } = useParams<{ id: string }>(); // ID do cliente (edição)
   const navigate = useNavigate();
 
- // Configuração do React Hook Form
-const {
-  register,        // Função usada para registrar cada campo do formulário no hook, permitindo controle e validação automática
-  handleSubmit,    // Função que envolve a função de envio do formulário e dispara a validação antes de chamar seu onSubmit
-  setValue,        // Função usada para programaticamente preencher ou alterar o valor de um campo do formulário
-  formState: { errors }, // Objeto que contém os erros de validação de cada campo registrado no formulário
-} = useForm<ClienteFormData>();
+  // Configuração do React Hook Form
+  // const {
+  //   register,        // Função usada para registrar cada campo do formulário no hook, permitindo controle e validação automática
+  //   handleSubmit,    // Função que envolve a função de envio do formulário e dispara a validação antes de chamar seu onSubmit
+  //   setValue,        // Função usada para programaticamente preencher ou alterar o valor de um campo do formulário
+  //   formState: { errors }, // Objeto que contém os erros de validação de cada campo registrado no formulário
+  // } = useForm<Customer>();
+
+
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<Customer>({
+  defaultValues: {
+    name: '',
+    phone: '',
+    car_model: '',
+    plate: '',
+    email: '',
+    password: ""
+  }
+});
 
   // =========================
   // useEffect: Carregar dados do cliente caso seja edição
   // =========================
   // useEffect: executa efeito colateral quando o componente renderiza ou quando 'id' ou 'setValue' mudam
-    useEffect(() => {
-    // Verifica se existe um 'id' (modo edição). 
-    // Se não houver, significa que estamos criando um novo cliente e não precisa carregar dados.
-    if (id) {
-        // Chama a função fetchCliente para buscar os dados do cliente pela API ou mock
-        fetchCliente(id).then((cliente) => {
-        // Quando os dados chegam, preenche o formulário automaticamente usando setValue do react-hook-form
-        
-        // Preenche o campo 'nome' com o valor do cliente
-        setValue("nome", cliente.nome);
+  // useEffect(() => {
+  // // Verifica se existe um 'id' (modo edição). 
+  // // Se não houver, significa que estamos criando um novo cliente e não precisa carregar dados.
+  // if (id) {
+  //     // Chama a função fetchCliente para buscar os dados do cliente pela API ou mock
+  //     fetchCliente(id).then((cliente) => {
+  //     // Quando os dados chegam, preenche o formulário automaticamente usando setValue do react-hook-form
 
-        // Preenche o campo 'telefone' com o valor do cliente
-        setValue("telefone", cliente.telefone);
+  //     // Preenche o campo 'nome' com o valor do cliente
+  //     setValue("nome", cliente.nome);
 
-        // Preenche o campo 'modelo' com o valor do cliente
-        setValue("modelo", cliente.modelo);
+  //     // Preenche o campo 'telefone' com o valor do cliente
+  //     setValue("telefone", cliente.telefone);
 
-        // Preenche o campo 'placa' com o valor do cliente
-        setValue("placa", cliente.placa);
+  //     // Preenche o campo 'modelo' com o valor do cliente
+  //     setValue("modelo", cliente.modelo);
 
-        //  (opcional)
-        setValue("observacoes", cliente.observacoes);
-        });
-    }
-    // Array de dependências: o efeito será executado sempre que 'id' ou 'setValue' mudarem
-    }, [id, setValue]);
+  //     // Preenche o campo 'placa' com o valor do cliente
+  //     setValue("placa", cliente.placa);
+
+  //     //  (opcional)
+  //     setValue("observacoes", cliente.observacoes);
+  //     });
+  // }
+  // // Array de dependências: o efeito será executado sempre que 'id' ou 'setValue' mudarem
+  // }, [id, setValue]);
 
   // =========================
   // Função de submissão do formulário
   // =========================
-  const onSubmit = async (data: ClienteFormData) => {
-    await saveCliente(data, id);
-    navigate("/clientes"); // Volta para lista após salvar
+  const onSubmit = async (data: Customer) => {
+
+   
+
+    const save = await saveCliente(data)
+
+    if(save?.success) {
+      toast.success(save.message)
+      onClose()
+      return
+    }
+
+    toast.error(save?.message)
+
+
+
+
+
+    navigate("/clientes"); 
   };
 
   // =========================
@@ -132,17 +169,19 @@ const {
               {/* =========================
                   Formulário
               ========================= */}
-              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                
+              <form  onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
                 {/* Campo Nome */}
                 <div className="flex flex-col">
                   <label className="text-text-secondary font-medium">Nome</label>
                   <input
+
                     type="text"
-                    {...register("nome", { required: true })}
+                    // onChange={(e) => setName(e.target.value)}
+                    {...register("name", { required: true })}
                     className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  {errors.nome && <span className="text-error text-sm">Nome é obrigatório</span>}
+                  {errors.name && <span className="text-error text-sm">Nome é obrigatório</span>}
                 </div>
 
                 {/* Campo Telefone */}
@@ -150,10 +189,11 @@ const {
                   <label className="text-text-secondary font-medium">Telefone</label>
                   <input
                     type="tel"
-                    {...register("telefone", { required: true })}
+                    // onChange={(e) => setPhone(e.target.value)}
+                    {...register("phone", { required: true })}
                     className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  {errors.telefone && <span className="text-error text-sm">Telefone é obrigatório</span>}
+                  {errors.phone && <span className="text-error text-sm">Telefone é obrigatório</span>}
                 </div>
 
                 {/* Campo Modelo do Carro */}
@@ -161,10 +201,11 @@ const {
                   <label className="text-text-secondary font-medium">Modelo do carro</label>
                   <input
                     type="text"
-                    {...register("modelo", { required: true })}
+                    // onChange={(e) => setCar_model(e.target.value)}
+                    {...register("car_model", { required: true })}
                     className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  {errors.modelo && <span className="text-error text-sm">Modelo é obrigatório</span>}
+                  {errors.car_model && <span className="text-error text-sm">Modelo é obrigatório</span>}
                 </div>
 
                 {/* Campo Placa */}
@@ -172,17 +213,41 @@ const {
                   <label className="text-text-secondary font-medium">Placa</label>
                   <input
                     type="text"
-                    {...register("placa", { required: true })}
+                    // onChange={(e) => setPlate(e.target.value)}
+                    {...register("plate", { required: true })}
                     className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  {errors.placa && <span className="text-error text-sm">Placa é obrigatória</span>}
+                  {errors.plate && <span className="text-error text-sm">Placa é obrigatória</span>}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-text-secondary font-medium">Email</label>
+                  <input
+                    type="email"
+                    // onChange={(e) => setEmail(e.target.value)}
+                    {...register("email", { required: true })}
+                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {errors.email && <span className="text-error text-sm">Email é obrigatorio</span>}
+                </div>
+
+
+                <div className="flex flex-col">
+                  <label className="text-text-secondary font-medium">Password</label>
+                  <input
+                    type="password"
+                    // onChange={(e) => setPassword(e.target.value)}
+                    {...register("password", { required: true })}
+                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {errors.password && <span className="text-error text-sm">Senha é obrigatoria</span>}
                 </div>
 
                 {/* Campo Observações */}
                 <div className="flex flex-col">
                   <label className="text-text-secondary font-medium">Observações</label>
-                  <textarea
-                    {...register("observacoes")}
+                  <textarea disabled
+                    // {...register("observacoes")}
                     className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>

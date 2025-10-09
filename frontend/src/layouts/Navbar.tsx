@@ -14,7 +14,8 @@ export default function Navbar() {
   ];
 
   return (
-   <nav className="w-full fixed top-0 left-0 z-50 bg-surface border-b border-border shadow-sm  ">
+    // trocar para flex
+   <nav className="w-full fixed  top-0 left-0 z-50 bg-surface border-b border-border shadow-sm  ">
       <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
         {/* Logo */}
         <motion.div

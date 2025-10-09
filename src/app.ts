@@ -3,12 +3,15 @@ import "dotenv/config"
 import v1Router from "./routes/v1/router";
 import prisma from "./client.prisma";
 import GlobalErrorHandler from "./handlers/GlobalErrorHandler";
+import cors from "cors"
 
 
 const app: Application = express()
 
 
 
+app.use(cors({ origin: "http://localhost:5173"
+}))
 
 app.use(express.json())
 app.use(urlencoded({extended: true}))
