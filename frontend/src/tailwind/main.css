@@ -49,4 +49,6 @@
   /* Destaque e Sombreamento */
   --color-highlight: #fefce8;         /* Amarelo claro */
   --color-shadow: rgba(0, 0, 0, 0.05); /* Sombra sutil */
+  --color-transpa: rgba(0, 0, 0, 0.5);
+   --color-transpa2: rgba(0, 0, 0, 0.5);
 }
