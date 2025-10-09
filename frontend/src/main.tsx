@@ -9,7 +9,7 @@ createRoot(document.getElementById('root')!).render(
 
 
     <RouterAppProvider />
-    <Toaster position="top-center" /> {/* renderizado sozinho */}
+      <Toaster position="top-center" /> {/* renderizado sozinho */}
 
   </StrictMode>,
 )

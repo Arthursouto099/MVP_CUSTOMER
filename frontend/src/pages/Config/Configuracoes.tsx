@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
+
 import { motion } from "framer-motion";
 
-// =========================
-// Componente Configurações
-// =========================
 export default function Configuracoes() {
   // =========================
   // Estado do tema do sistema
@@ -48,9 +46,6 @@ export default function Configuracoes() {
     localStorage.setItem("empresa", JSON.stringify(empresa));
   }, [tema, preco, empresa]);
 
-  // =========================
-  // Renderização
-  // =========================
   return (
     <div className="p-6 mt-20 max-w-4xl mx-auto flex flex-col gap-6">
       <h2 className="text-2xl font-bold text-text-primary mb-4">Configurações do Sistema</h2>
@@ -70,7 +65,7 @@ export default function Configuracoes() {
             className={`px-4 py-2 rounded-lg font-medium shadow transition-colors ${
               tema === "claro"
                 ? "bg-primary text-surface"
-                : "bg-background text-text-primary border-border"
+                : "bg-background text-text-primary  border-border"
             }`}
             onClick={() => setTema("claro")}
           >
