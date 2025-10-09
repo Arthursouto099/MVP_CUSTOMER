@@ -10,7 +10,17 @@
 --> de preferencia mantenha os nomes e troque só as cores
 */
 
+.perspective {
+  perspective: 1000px;
+}
 
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotateY-180 {
+  transform: rotateY(180deg);
+}
 
 @theme {
   /* Neutros (base para fundo, bordas e texto) */

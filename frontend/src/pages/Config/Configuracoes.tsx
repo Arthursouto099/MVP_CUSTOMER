@@ -1,22 +1,34 @@
 import { useState, useEffect } from "react";
-
 import { motion } from "framer-motion";
 
+// =========================
+// Componente Configurações
+// =========================
 export default function Configuracoes() {
-  // Tema: claro / escuro
+  // =========================
+  // Estado do tema do sistema
+  // Pode ser "claro" ou "escuro"
+  // =========================
   const [tema, setTema] = useState("claro");
 
-  // Preço padrão da lavagem
+  // =========================
+  // Estado do preço padrão da lavagem
+  // =========================
   const [preco, setPreco] = useState(50);
 
-  // Dados da empresa
+  // =========================
+  // Estado dos dados da empresa
+  // Contém nome, telefone e endereço
+  // =========================
   const [empresa, setEmpresa] = useState({
     nome: "Lava Rápido XPTO",
     telefone: "(11) 99999-9999",
     endereco: "Rua Exemplo, 123, São Paulo",
   });
 
-  // Carregar configurações do localStorage
+  // =========================
+  // Carregar configurações do localStorage ao montar
+  // =========================
   useEffect(() => {
     const temaLS = localStorage.getItem("tema");
     const precoLS = localStorage.getItem("preco");
@@ -27,18 +39,25 @@ export default function Configuracoes() {
     if (empresaLS) setEmpresa(JSON.parse(empresaLS));
   }, []);
 
-  // Salvar alterações no localStorage
+  // =========================
+  // Salvar alterações no localStorage sempre que algo mudar
+  // =========================
   useEffect(() => {
     localStorage.setItem("tema", tema);
     localStorage.setItem("preco", preco.toString());
     localStorage.setItem("empresa", JSON.stringify(empresa));
   }, [tema, preco, empresa]);
 
+  // =========================
+  // Renderização
+  // =========================
   return (
     <div className="p-6 mt-20 max-w-4xl mx-auto flex flex-col gap-6">
       <h2 className="text-2xl font-bold text-text-primary mb-4">Configurações do Sistema</h2>
 
-      {/* Card: Tema */}      
+      {/* =========================
+          Card de Tema
+      ========================= */}
       <motion.div
         className="p-4 bg-surface rounded-xl shadow-md border border-border flex flex-col gap-3"
         initial={{ opacity: 0, y: 10 }}
@@ -51,7 +70,7 @@ export default function Configuracoes() {
             className={`px-4 py-2 rounded-lg font-medium shadow transition-colors ${
               tema === "claro"
                 ? "bg-primary text-surface"
-                : "bg-background text-text-primary  border-border"
+                : "bg-background text-text-primary border-border"
             }`}
             onClick={() => setTema("claro")}
           >
@@ -70,7 +89,9 @@ export default function Configuracoes() {
         </div>
       </motion.div>
 
-      {/* Card: Preço padrão */}
+      {/* =========================
+          Card de Preço Padrão da Lavagem
+      ========================= */}
       <motion.div
         className="p-4 bg-surface rounded-xl shadow-md border border-border flex flex-col gap-3"
         initial={{ opacity: 0, y: 10 }}
@@ -86,7 +107,9 @@ export default function Configuracoes() {
         />
       </motion.div>
 
-      {/* Card: Dados da empresa */}
+      {/* =========================
+          Card de Dados da Empresa
+      ========================= */}
       <motion.div
         className="p-4 bg-surface rounded-xl shadow-md border border-border flex flex-col gap-3"
         initial={{ opacity: 0, y: 10 }}
