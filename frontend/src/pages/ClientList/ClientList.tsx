@@ -165,7 +165,7 @@ export default function ClientesList() {
 
                 {/* Avatar */}
                 <img
-                  src={`https://robohash.org/${encodeURIComponent(cliente.nome)}.png?set=set5&bgset=bg1`}
+                  src={`https://api.dicebear.com/9.x/miniavs/svg?seed=${cliente.nome}`}
                   alt={cliente.nome}
                   className="w-16 h-16 rounded-full border border-border shadow-sm object-cover"
                 />
