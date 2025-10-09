@@ -21,10 +21,21 @@ model Customer {
   phone        String
   email String @unique
   password String
-  plate        String   @unique
+  plate        String   @unique @default("KYZ2J19")
+  car_model String 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
+   
   services     Service[]
+}
+
+
+enum StatusService {
+  PRONTO
+  EM_LAVAGEM
+  AGENDADO
+  CANCELADO
+  DESTRUIDO
 }
 
 model Service {
@@ -35,7 +46,7 @@ model Service {
   description String?
   service_type         String
   price        Decimal
-  status       String?   // pending, in_progress, done, paid
+  status        StatusService @default(AGENDADO) // pending, in_progress, done, paid
   checkOutDate  DateTime?
   checkInDate    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())

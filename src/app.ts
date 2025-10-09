@@ -2,6 +2,7 @@ import express, { Application, urlencoded } from "express";
 import "dotenv/config"
 import v1Router from "./routes/v1/router";
 import prisma from "./client.prisma";
+import GlobalErrorHandler from "./handlers/GlobalErrorHandler";
 
 
 const app: Application = express()
@@ -15,6 +16,7 @@ app.use(urlencoded({extended: true}))
 
 // running in first version of router api :: v1
 app.use("/api/v1", v1Router)
+app.use(GlobalErrorHandler)
 
 
 
