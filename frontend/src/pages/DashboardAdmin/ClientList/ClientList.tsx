@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, Edit, Trash, Car } from "lucide-react";
-import ClientFormData from "../../components/ClientFormData";
-import ClienteDetails from "../../components/ClienteDetail";
+import ClientFormData from "../../../components/ClientFormData";
+import ClienteDetails from "../../../components/ClienteDetail";
 
 // Import de imagens para status do carro
-import CarWashImg from "../../assets/car-wash.png";
-import CarShineImg from "../../assets/car-shine.png";
-import CarClockImg from "../../assets/car-clock.png";
-import type { Customer } from "../../api/@customer/customer.type";
-import CustomerHttpActions from "../../api/@customer/customer.axios";
+import CarWashImg from "../../../assets/car-wash.png";
+import CarShineImg from "../../../assets/car-shine.png";
+import CarClockImg from "../../../assets/car-clock.png";
+import type { Customer } from "../../../api/@customer/customer.type";
+import CustomerHttpActions from "../../../api/@customer/customer.axios";
 
 // =========================
 // Definição da Interface Cliente
@@ -129,7 +129,7 @@ export default function ClientesList() {
   // Renderização do componente
   // =========================
   return (
-    <div className="p-6 pt-20">
+    <div className="p-6 pt-5">
 
       {/* =========================
           Cabeçalho da página

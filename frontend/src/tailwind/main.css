@@ -31,17 +31,7 @@ body.dark .border-border {
   border-color: #30363d;
 }
 
-.perspective {
-  perspective: 1000px;
-}
 
-.backface-hidden {
-  backface-visibility: hidden;
-}
-
-.rotateY-180 {
-  transform: rotateY(180deg);
-}
 /* main.css */
 
 /* 🌤️ Tema Claro */
