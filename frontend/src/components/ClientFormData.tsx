@@ -21,42 +21,47 @@ interface ClienteFormData {
 type ClienteFormProps = {
   isOpen: boolean; // Controle de visibilidade do modal
   onClose: () => void; // Função para fechar o modal
+  id_customer?: string
 };
 
 // =========================
 // Fake API / Placeholder
 // =========================
-const fetchCliente = async (id: string) => {
+const fetchCliente = async (id_customer: string) => {
   // Substituir por fetch/axios da sua API real
-  return {
-    nome: "João da Silva",
-    telefone: "(11) 99999-9999",
-    modelo: "Chevrolet Onix",
-    placa: "ABC-1234",
-    observacoes: "Cliente frequente",
-  };
+  const customer = CustomerHttpActions.getCustomer({ id_customer })
+  return customer
+
 };
 
 const saveCliente = async (data: Customer, id_customer?: string) => {
-  if (!id_customer) {
-    const save = await CustomerHttpActions.createCustomer({ data })
-    return save
+  try {
+    if (id_customer) {
+      // Atualizar cliente existente
+      const update = await CustomerHttpActions.updateCustomer({
+        id_customer,
+        data,
+      });
+      return update;
+    } else {
+      // Criar novo cliente
+      const save = await CustomerHttpActions.createCustomer({ data });
+      return save;
+    }
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Erro ao salvar cliente" };
   }
 };
 
 // =========================
 // Componente ClienteForm
 // =========================
-export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
-  const [name, setName] = useState<string>("")
-  const [phone, setPhone] = useState<string>("")
-  const [email, setEmail] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
-  const [plate, setPlate] = useState<string>("")
-  const [car_model, setCar_model] = useState<string>("")
+export default function ClienteForm({ isOpen, onClose, id_customer }: ClienteFormProps) {
 
-  const { id } = useParams<{ id: string }>(); // ID do cliente (edição)
-  const navigate = useNavigate();
+
+
+
 
   // Configuração do React Hook Form
   // const {
@@ -67,71 +72,81 @@ export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
   // } = useForm<Customer>();
 
 
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm<Customer>({
-  defaultValues: {
-    name: '',
-    phone: '',
-    car_model: '',
-    plate: '',
-    email: '',
-    password: ""
-  }
-});
+  const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<Customer>({
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: '',
+      password: "",
+      frequent: false
+    }
+  });
 
   // =========================
   // useEffect: Carregar dados do cliente caso seja edição
   // =========================
   // useEffect: executa efeito colateral quando o componente renderiza ou quando 'id' ou 'setValue' mudam
-  // useEffect(() => {
-  // // Verifica se existe um 'id' (modo edição). 
-  // // Se não houver, significa que estamos criando um novo cliente e não precisa carregar dados.
-  // if (id) {
-  //     // Chama a função fetchCliente para buscar os dados do cliente pela API ou mock
-  //     fetchCliente(id).then((cliente) => {
-  //     // Quando os dados chegam, preenche o formulário automaticamente usando setValue do react-hook-form
+  useEffect(() => {
+    // Verifica se existe um 'id' (modo edição). 
+    // Se não houver, significa que estamos criando um novo cliente e não precisa carregar dados.
+    if (id_customer) {
+      // Chama a função fetchCliente para buscar os dados do cliente pela API ou mock
+      fetchCliente(id_customer).then((cliente) => {
+        // Quando os dados chegam, preenche o formulário automaticamente usando setValue do react-hook-form
 
-  //     // Preenche o campo 'nome' com o valor do cliente
-  //     setValue("nome", cliente.nome);
+        // Preenche o campo 'nome' com o valor do cliente
+        setValue("name", cliente.data?.name ?? "");
 
-  //     // Preenche o campo 'telefone' com o valor do cliente
-  //     setValue("telefone", cliente.telefone);
+        // Preenche o campo 'telefone' com o valor do cliente
+        setValue("phone", cliente.data?.phone ?? "");
 
-  //     // Preenche o campo 'modelo' com o valor do cliente
-  //     setValue("modelo", cliente.modelo);
+        // Preenche o campo 'modelo' com o valor do cliente
 
-  //     // Preenche o campo 'placa' com o valor do cliente
-  //     setValue("placa", cliente.placa);
+        setValue("email", cliente.data?.email ?? "")
 
-  //     //  (opcional)
-  //     setValue("observacoes", cliente.observacoes);
-  //     });
-  // }
-  // // Array de dependências: o efeito será executado sempre que 'id' ou 'setValue' mudarem
-  // }, [id, setValue]);
+        setValue("password", cliente.data?.password ?? "")
+
+        setValue("plan", cliente.data?.plan ?? "BRONZE")
+
+        setValue("priority", cliente.data?.priority ?? "NOVO")
+
+        setValue("obs", cliente.data?.obs)
+
+      
+
+
+      });
+    }
+
+    else {
+      reset({
+        name: "",
+        phone: "",
+        email: "",
+        password: "",
+        obs: ""
+
+      })
+    }
+    // Array de dependências: o efeito será executado sempre que 'id' ou 'setValue' mudarem
+  }, [id_customer, setValue]);
 
   // =========================
   // Função de submissão do formulário
   // =========================
   const onSubmit = async (data: Customer) => {
+    const save = await saveCliente(data, id_customer);
 
-   
-
-    const save = await saveCliente(data)
-
-    if(save?.success) {
-      toast.success(save.message)
+    if (save?.success) {
+      toast.success(save.message);
+      onClose();
+    } else {
+      toast.error(save?.message || "Erro ao salvar o cliente");
       onClose()
-      return
     }
-
-    toast.error(save?.message)
-
-
-
-
-
-    navigate("/clientes"); 
   };
+
+  const frequentValue = watch("frequent");
 
   // =========================
   // Renderização do Modal
@@ -163,13 +178,13 @@ export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
             >
               {/* Título do modal */}
               <h2 className="text-2xl font-bold text-text-primary mb-6">
-                {id ? "Editar Cliente" : "Novo Cliente"}
+                {id_customer ? "Editar Cliente" : "Novo Cliente"}
               </h2>
 
               {/* =========================
                   Formulário
               ========================= */}
-              <form  onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 
                 {/* Campo Nome */}
                 <div className="flex flex-col">
@@ -196,29 +211,7 @@ export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
                   {errors.phone && <span className="text-error text-sm">Telefone é obrigatório</span>}
                 </div>
 
-                {/* Campo Modelo do Carro */}
-                <div className="flex flex-col">
-                  <label className="text-text-secondary font-medium">Modelo do carro</label>
-                  <input
-                    type="text"
-                    // onChange={(e) => setCar_model(e.target.value)}
-                    {...register("car_model", { required: true })}
-                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  {errors.car_model && <span className="text-error text-sm">Modelo é obrigatório</span>}
-                </div>
 
-                {/* Campo Placa */}
-                <div className="flex flex-col">
-                  <label className="text-text-secondary font-medium">Placa</label>
-                  <input
-                    type="text"
-                    // onChange={(e) => setPlate(e.target.value)}
-                    {...register("plate", { required: true })}
-                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  {errors.plate && <span className="text-error text-sm">Placa é obrigatória</span>}
-                </div>
 
                 <div className="flex flex-col">
                   <label className="text-text-secondary font-medium">Email</label>
@@ -243,11 +236,54 @@ export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
                   {errors.password && <span className="text-error text-sm">Senha é obrigatoria</span>}
                 </div>
 
+                <div className="flex flex-col">
+                  <label className="text-text-secondary font-medium">Frequente</label>
+                  {/* <input
+                    type="op"
+                    // onChange={(e) => setPassword(e.target.value)}
+                 
+                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  /> */}
+              
+
+
+                  {errors.password && <span className="text-error text-sm">Senha é obrigatoria</span>}
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="text-text-secondary font-medium">Prioridade</label>
+                  <select
+                    id="priority"
+                    {...register("priority", { required: true })}
+                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    defaultValue={watch("priority") ?? "NOVO"} // valor inicial
+                  >
+                    <option value="VIP">VIP</option>
+                    <option value="REGULAR">REGULAR</option>
+                    <option value="NOVO">NOVO</option>
+                  </select>
+                </div>
+
+
+                <div className="flex flex-col">
+                  <label className="text-text-secondary font-medium">Plano</label>
+                  <select
+                    id="plan"
+                    {...register("plan", { required: true })}
+                    className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    defaultValue={watch("plan") ?? "BRONZE"} // valor inicial
+                  >
+                    <option value="BRONZE">BRONZE</option>
+                    <option value="PRATA">PRATA</option>
+                    <option value="OURO">OURO</option>
+                  </select>
+                </div>
+
                 {/* Campo Observações */}
                 <div className="flex flex-col">
                   <label className="text-text-secondary font-medium">Observações</label>
-                  <textarea disabled
-                    // {...register("observacoes")}
+                  <textarea
+                    {...register("obs")}
                     className="mt-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
@@ -258,7 +294,7 @@ export default function ClienteForm({ isOpen, onClose }: ClienteFormProps) {
                     type="submit"
                     className="flex-1 bg-primary hover:bg-primary-hover text-surface px-4 py-2 rounded-lg font-medium shadow transition-colors"
                   >
-                    {id ? "Salvar Alterações" : "Cadastrar Cliente"}
+                    {id_customer ? "Salvar Alterações" : "Cadastrar Cliente"}
                   </button>
 
                   <button

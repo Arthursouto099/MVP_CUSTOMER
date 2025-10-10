@@ -1,4 +1,4 @@
-import type { Service } from "../@service/service.type";
+
 
 
 
@@ -8,13 +8,12 @@ export type Customer = {
     phone: string;
     email: string;
     password: string;
-    plate: string;
-    car_model: string;
     updatedAt?: Date;
     createdAt?: Date;
     frequent?: boolean
-    priority?: "VIP" | "REGULAR" | "NOVP"
-    services: Service[]
+    priority?: "VIP" | "REGULAR" | "NOVO"
+    plan?: "BRONZE" | "PRATA" | "OURO"
+    obs?: string
 } 
 
 

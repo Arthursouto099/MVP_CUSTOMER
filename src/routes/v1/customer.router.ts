@@ -11,5 +11,6 @@ customerRouter.post("/create", validateSchema(CustomerSchema), CustomerControlle
 customerRouter.get("/all", CustomerController.FindCustomers)
 customerRouter.put("/update/:id_customer", validateSchema(CustomerUpdateSchema), CustomerController.UpdateCustomer)
 customerRouter.delete("/delete/:id_customer", CustomerController.DeleteCustomer)
+customerRouter.get("/:id_customer", CustomerController.FindCustomerById)
 
 export default customerRouter

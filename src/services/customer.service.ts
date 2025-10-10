@@ -1,3 +1,4 @@
+import { string } from "zod";
 import { Prisma } from "../../generated/prisma";
 import prisma from "../client.prisma";
 import ErrorHandler from "../errors/ErrorHandler";
@@ -18,11 +19,23 @@ const CustomerService = {
     },
 
 
+    findCustomerById: async ({id_customer}: {id_customer: string}) => {
+        try {
+            return await prisma.customer.findUnique({where: {id_customer}}) 
+        }
+
+        catch(e) {
+            throw errorHandlerReturn(e, CustomerError)
+        }
+
+    },
+
+
     findAllCustomers: async ({page = 1, limit = 10}: {page: number, limit: number}) => {
         try{
             const skip = (page - 1) * limit
 
-            return await prisma.customer.findMany({skip: skip, take: limit, orderBy: {createdAt: 'desc'}, include: {services: {orderBy: {checkInDate: "asc"} }}} ) ?? []
+            return await prisma.customer.findMany({skip: skip, take: limit, orderBy: {createdAt: 'desc'}} ) ?? []
         }
         catch(e) {
             throw errorHandlerReturn(e, CustomerError)

@@ -23,7 +23,7 @@ const ServicesService = {
         try{
             const skip = (page - 1) * limit
 
-            return await prisma.service.findMany({skip: skip, take: limit, orderBy: {checkInDate: 'desc'}, include: {customer: true}}) ?? []
+            return await prisma.service.findMany({skip: skip, take: limit, orderBy: {checkInDate: 'desc'}}) ?? []
         }
         catch(e) {
             throw errorHandlerReturn(e, ServiceError)

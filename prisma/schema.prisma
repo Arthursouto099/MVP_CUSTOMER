@@ -20,13 +20,26 @@ model Customer {
   name         String
   phone        String
   email String @unique
+  priority Priority @default(NOVO)
+  plan Plan @default(BRONZE) 
   password String
-  plate        String   @unique @default("KYZ2J19")
-  car_model String 
+  frequent Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
+  obs String?  
    
-  services     Service[]
+}
+
+enum Plan {
+  BRONZE 
+  PRATA
+  OURO
+}
+
+enum Priority {
+  VIP
+  REGULAR
+  NOVO
 }
 
 
@@ -40,15 +53,11 @@ enum StatusService {
 
 model Service {
   id_service           String   @id @default(uuid())
-  customer_id   String
-  customer     Customer @relation(fields: [customer_id], references: [id_customer])
   name  String
   description String?
   service_type         String
-  price        Decimal
-  status        StatusService @default(AGENDADO) // pending, in_progress, done, paid
+  price        Decimal 
   checkOutDate  DateTime?
   checkInDate    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
-  isPaid Boolean @default(false)
 }

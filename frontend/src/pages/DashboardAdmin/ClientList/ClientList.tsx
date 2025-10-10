@@ -10,6 +10,7 @@ import CarShineImg from "../../../assets/car-shine.png";
 import CarClockImg from "../../../assets/car-clock.png";
 import type { Customer } from "../../../api/@customer/customer.type";
 import CustomerHttpActions from "../../../api/@customer/customer.axios";
+import { toast } from "sonner";
 
 // =========================
 // Definição da Interface Cliente
@@ -45,23 +46,21 @@ interface Cliente {
 // =========================
 export default function ClientesList() {
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [isUpdate, setUpdate] = useState<string | undefined>(undefined)
+  const [isUpdateReload, setReload] = useState<boolean>(false)
 
   useEffect(() => {
+    const findCustomers = async (append = false) => {
+      const response = await CustomerHttpActions.getCustomers({ page: 1, limit: 40 });
+      const data = response.data ?? [];
 
-    const findCustomers = async () => {
-      const getCustomers = (await CustomerHttpActions.getCustomers({ page: 1, limit: 40 })).data ?? []
-      setCustomers((prev) => {
-        const filtered = getCustomers.filter(np => !prev.some(p => p.id_customer === np.id_customer))
-        return [...prev, ...filtered]
-      })
-    }
+      setCustomers(prev => append ? [...prev, ...data] : data);
+    };
 
-    findCustomers()
-
-  }, [])
+    findCustomers();
+  }, [isUpdateReload]);
 
 
-  console.log(customers)
 
 
 
@@ -76,6 +75,7 @@ export default function ClientesList() {
   const [isModal2Open, setIsModal2Open] = useState(false); // Modal de detalhes
 
   // Funções para abrir modais
+
   const openModal = () => setIsModalOpen(true);
   const openModal2 = () => setIsModal2Open(true);
 
@@ -87,16 +87,21 @@ export default function ClientesList() {
   const clientesFiltrados = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(busca.toLowerCase()) ||
-      c.phone.includes(busca) ||
-      c.car_model.toLowerCase().includes(busca.toLowerCase()) ||
-      c.plate.toLowerCase().includes(busca.toLowerCase())
+      c.phone.includes(busca)
+    // ||
+    // c.car_model.toLowerCase().includes(busca.toLowerCase()) ||
+    // c.plate.toLowerCase().includes(busca.toLowerCase())
   );
 
   // Remove cliente da lista
-  const handleDelete = (id: string) => {
-    if (confirm("Deseja realmente excluir este cliente?")) {
-      setCustomers((prev) => prev.filter((c) => c.id_customer !== id));
-    }
+  const handleDelete = async (id: string) => {
+    const deleteCustomer = await CustomerHttpActions.deleteCustomer({ id_customer: id })
+    if (deleteCustomer.success) return toast.success(deleteCustomer.message)
+    toast.error(deleteCustomer.message)
+    setReload((prev) => !prev)
+    return
+
+
   };
 
   // Fechar modal de edição e abrir modal de cadastro
@@ -149,7 +154,12 @@ export default function ClientesList() {
       ========================= */}
 
       {/* modal de cadastro */}
-      <ClientFormData isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ClientFormData isOpen={isModalOpen} onClose={() => {
+        setUpdate(undefined)
+        setIsModalOpen(false)
+        setReload((prev) => !prev)
+
+      }} id_customer={isUpdate} />
 
 
       <ClienteDetails isOpen={isModal2Open} onClose={() => setIsModal2Open(false)} onEditChange={handleEditChange} />
@@ -200,20 +210,22 @@ export default function ClientesList() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                      {cliente.name}
-                      {!cliente.frequent && (
-                        <span className="text-yellow-500 text-sm font-semibold">★ VIP</span>
-                      )}
+                      {cliente.name.split(" ")[0] + " " + cliente.name.split(" ")[1]}
+
+                      <span className={`${cliente.plan === "OURO" ? "text-yellow-500" : cliente.plan === "PRATA" ? "text-text-muted" : "text-secondary"}  text-sm font-semibold`}>★ {cliente.plan}</span>
+
                     </h3>
                     {/* VALOR DEFAULT --> vou adicionar no banco mais tarde */}
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${prioridadeColor(cliente.priority ?? "NOVO")}`}
                     >
-                      {cliente.priority ?? "NOVO"}
+                      {cliente.priority}
                     </span>
                   </div>
 
-                  <p className="text-text-secondary">{cliente.phone}</p>
+                  <p className="text-text-secondary">
+                    {`(${cliente.phone.slice(0, 2)}) ${cliente.phone.slice(2, 7)}-${cliente.phone.slice(7)}`}
+                  </p>
                   <p className="text-text-muted text-sm mt-1">
                     Cadastrado em {cliente.createdAt ? new Date(cliente.createdAt).toLocaleDateString() : "não informado"}
 
@@ -227,8 +239,8 @@ export default function ClientesList() {
 
               {/* Trocar para imagem de não possui serviços caso o  (cliente.services[0]?.status) não exista  */}
 
-              <div className="mt-4 bg-primary-muted rounded-lg p-6 flex flex-col items-center justify-center shadow-inner">
-                {/* Imagem de acordo com o status */}
+              {/* <div className="mt-4 bg-primary-muted rounded-lg p-6 flex flex-col items-center justify-center shadow-inner">
+                
                 <div className="mb-3">
                   {((cliente.services[0]?.status) ?? "EM_LAVAGEM") === "EM_LAVAGEM" && (
                     <img src={CarWashImg} alt="Em Lavagem" className="w-20 h-20" />
@@ -239,12 +251,12 @@ export default function ClientesList() {
                   {((cliente.services[0]?.status) ?? "EM_LAVAGEM") === "AGENDADO" && (
                     <img src={CarClockImg} alt="Agendado" className="w-20 h-20" />
                   )}
-                  {/* Caso não seja nenhum dos anteriores, mostra um default */}
+     
                
-                </div>
+                </div> */}
 
-                {/* Informações do carro */}
-                <div className="text-center">
+              {/* Informações do carro */}
+              {/* <div className="text-center">
                   <p className="text-text-primary font-semibold">{cliente.car_model}</p>
                   <p className="text-text-secondary text-sm">Placa: {cliente.plate}</p>
                   <p
@@ -253,8 +265,8 @@ export default function ClientesList() {
                     {cliente.services[0]?.status ?? "EM_LAVAGEM"}
                   </p>
                 </div>
-              </div>
-              
+              </div> */}
+
 
               {/* =========================
                   Botões de Ação
@@ -271,7 +283,10 @@ export default function ClientesList() {
 
                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                   <button
-                    onClick={openModal}
+                    onClick={() => {
+                      setUpdate(cliente.id_customer ?? "")
+                      openModal()
+                    }}
                     className="text-primary p-2 rounded-md transition-colors"
                   >
                     <Edit size={18} />

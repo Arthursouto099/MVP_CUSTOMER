@@ -9,9 +9,10 @@ export const CustomerSchema = z.object({
     name: z.string(),
     phone: z.string(),
     email: z.email(),
+    plan: z.enum(["BRONZE", "PRATA", "OURO"]).optional(),
+    priority: z.enum(["VIP", "REGULAR", "NOVO"]).optional(),
+    obs: z.string().optional(),
     password: z.string(),
-    plate: z.string(),
-    car_model: z.string()
 })
 
 
