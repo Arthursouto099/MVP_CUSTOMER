@@ -20,13 +20,27 @@ model Customer {
   name         String
   phone        String
   email String @unique
+  priority Priority @default(NOVO)
+  plan Plan @default(BRONZE) 
   password String
-  plate        String   @unique @default("KYZ2J19")
-  car_model String 
+  frequent Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
+  obs String? 
+  vehicles Vehicle[]  
    
-  services     Service[]
+}
+
+enum Plan {
+  BRONZE 
+  PRATA
+  OURO
+}
+
+enum Priority {
+  VIP
+  REGULAR
+  NOVO
 }
 
 
@@ -38,17 +52,46 @@ enum StatusService {
   DESTRUIDO
 }
 
+
+enum TypeService {
+  AVULSO
+  ASSINATURA
+}
+
+enum TypePlan {
+  PRATA
+  OURO
+  BRONZE
+  AVULSO
+}
+
 model Service {
   id_service           String   @id @default(uuid())
-  customer_id   String
-  customer     Customer @relation(fields: [customer_id], references: [id_customer])
   name  String
   description String?
   service_type         String
-  price        Decimal
-  status        StatusService @default(AGENDADO) // pending, in_progress, done, paid
-  checkOutDate  DateTime?
+  price        Decimal 
   checkInDate    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
-  isPaid Boolean @default(false)
+  type TypeService @default(AVULSO)
+  typePlan TypePlan @default(AVULSO)
+}
+
+enum TypeVehicle {
+  CARRO
+  MOTO
+  CAMINHAO
+  OUTRO
+}
+
+model  Vehicle {
+  id_vehicle String @id @default(uuid())
+  id_customer String
+  customer Customer @relation(fields: [id_customer], references: [id_customer])
+  type TypeVehicle @default(OUTRO)
+  model String
+  plate String
+  year String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 }

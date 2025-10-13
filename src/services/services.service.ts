@@ -23,7 +23,16 @@ const ServicesService = {
         try{
             const skip = (page - 1) * limit
 
-            return await prisma.service.findMany({skip: skip, take: limit, orderBy: {checkInDate: 'desc'}, include: {customer: true}}) ?? []
+            return await prisma.service.findMany({skip: skip, take: limit, orderBy: {checkInDate: 'desc'}}) ?? []
+        }
+        catch(e) {
+            throw errorHandlerReturn(e, ServiceError)
+        }
+    },
+
+     findAllService: async ({id_service}: {id_service: string}) => {
+        try{
+            return await prisma.service.findUnique({where: {id_service}})
         }
         catch(e) {
             throw errorHandlerReturn(e, ServiceError)

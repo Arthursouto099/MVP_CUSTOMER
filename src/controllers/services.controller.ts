@@ -27,6 +27,16 @@ const ServiceController = {
         }
     },
 
+    FindService: async (req: Request, res: Response, next: NextFunction) => {
+        try{
+            const isService = await ServicesService.findAllService({id_service: req.params.id_service})
+            Ok(res, "Services finded", 200, isService)
+        }
+        catch(e) {
+            next(e)
+        }
+    },
+
 
     UpdateService: async (req: Request, res: Response, next: NextFunction) => {
         try {
