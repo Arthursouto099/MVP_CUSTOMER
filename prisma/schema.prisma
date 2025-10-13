@@ -26,7 +26,8 @@ model Customer {
   frequent Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
-  obs String?  
+  obs String? 
+  vehicles Vehicle[]  
    
 }
 
@@ -51,13 +52,46 @@ enum StatusService {
   DESTRUIDO
 }
 
+
+enum TypeService {
+  AVULSO
+  ASSINATURA
+}
+
+enum TypePlan {
+  PRATA
+  OURO
+  BRONZE
+  AVULSO
+}
+
 model Service {
   id_service           String   @id @default(uuid())
   name  String
   description String?
   service_type         String
   price        Decimal 
-  checkOutDate  DateTime?
   checkInDate    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
+  type TypeService @default(AVULSO)
+  typePlan TypePlan @default(AVULSO)
+}
+
+enum TypeVehicle {
+  CARRO
+  MOTO
+  CAMINHAO
+  OUTRO
+}
+
+model  Vehicle {
+  id_vehicle String @id @default(uuid())
+  id_customer String
+  customer Customer @relation(fields: [id_customer], references: [id_customer])
+  type TypeVehicle @default(OUTRO)
+  model String
+  plate String
+  year String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 }

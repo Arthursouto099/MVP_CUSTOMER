@@ -3,32 +3,20 @@ import { motion } from "framer-motion";
 import NavbarCliente from "../../layouts/ClienteLayout/NavbarCliente";
 import { User, CreditCard, LogOut, CalendarCheck } from "lucide-react";
 import ClienteAssinatura from "./Assinatura";
+import type { Customer } from "../../api/@customer/customer.type";
+import CustomerHttpActions from "../../api/@customer/customer.axios";
+import { jwtDecode } from "jwt-decode";
 // import ClienteHttpActions from "../api/@cliente/cliente.axios"; // Futuro: Axios
 
 // =========================
 // Tipagem do usuário e histórico
 // =========================
-interface Pagamento {
-  metodo: string;
-  finalCartao: string;
-  validade: string;
-}
 
-interface Plano {
-  nome: string;
-  preco: number;
-  beneficios: string[];
-}
 
-interface Usuario {
-  nome: string;
-  email: string;
-  telefone: string;
-  carro: string;
-  placa: string;
-  planoAtivo: Plano;
-  pagamento: Pagamento;
-}
+type JWTPayload = {
+  data: Customer
+};
+
 
 interface Servico {
   id: number;
@@ -42,15 +30,7 @@ interface Servico {
 // =========================
 // Mock de dados
 // =========================
-const MOCK_USUARIO: Usuario = {
-  nome: "Lucas William",
-  email: "lucas@example.com",
-  telefone: "(11) 99999-9999",
-  carro: "Honda Civic 2022",
-  placa: "ABC-1234",
-  planoAtivo: { nome: "Ouro", preco: 149.9, beneficios: ["Lavagens ilimitadas", "Brinde mensal", "Suporte VIP"] },
-  pagamento: { metodo: "Cartão de crédito", finalCartao: "1234", validade: "12/27" },
-};
+
 
 const MOCK_HISTORICO: Servico[] = [
   { id: 1, nome: "Lavagem Completa", data: "01/10/2025", hora: "14:30", preco: 59.9, status: "Concluído" },
@@ -63,7 +43,7 @@ const MOCK_HISTORICO: Servico[] = [
 // Componente
 // =========================
 export default function PerfilUltraPremiumComHistorico() {
-  const [user, setUser] = useState<Usuario | null>(null);
+  const [user, setUser] = useState<Customer | null>(null);
   const [historicoServicos, setHistoricoServicos] = useState<Servico[]>([]);
 
   // =========================
@@ -72,23 +52,18 @@ export default function PerfilUltraPremiumComHistorico() {
   useEffect(() => {
     const fetchDados = async () => {
       try {
-        // =========================
-        // Tente buscar do banco via Axios
-        // =========================
-        // const responseUsuario = await ClienteHttpActions.getPerfil();
-        // const responseHistorico = await ClienteHttpActions.getHistoricoServicos();
-        // setUser(responseUsuario.data);
-        // setHistoricoServicos(responseHistorico.data);
 
-        // =========================
-        // MOCK: fallback se a API falhar
-        // =========================
-        setUser(MOCK_USUARIO);
+        const responseUsuario = await CustomerHttpActions.getCustomer({ id_customer: jwtDecode<JWTPayload>(localStorage.getItem("token") ?? "").data.id_customer ?? "" });
+
+        setUser(responseUsuario.data ?? null);
+
+
+
         setHistoricoServicos(MOCK_HISTORICO);
 
       } catch (err) {
         console.error("Erro ao buscar dados do backend, usando mock:", err);
-        setUser(MOCK_USUARIO);
+
         setHistoricoServicos(MOCK_HISTORICO);
       }
     };
@@ -132,19 +107,19 @@ export default function PerfilUltraPremiumComHistorico() {
         {/* Header com Avatar */}
         <motion.div layout className="flex items-center gap-6">
           <img
-            src={`https://api.dicebear.com/9.x/miniavs/svg?seed=${user.nome}.svg`}
-            alt={user.nome}
+            src={`https://api.dicebear.com/9.x/miniavs/svg?seed=${user.name}`}
+            alt={user.name}
             className="w-28 h-28 rounded-full border-4 border-border shadow-lg bg-surface"
           />
           <div>
-            <h1 className="text-4xl font-bold">{user.nome}</h1>
+            <h1 className="text-4xl font-bold">{user.name}</h1>
             <p className="text-text-secondary">{user.email}</p>
           </div>
         </motion.div>
 
         {/* Indicadores */}
         <motion.div layout className="grid sm:grid-cols-3 gap-6">
-          <ClienteAssinatura clienteId="1"/>
+          <ClienteAssinatura clienteId="1" />
           <div className="bg-surface/70 backdrop-blur-lg border border-border rounded-3xl shadow-xl p-6">
             <h3 className="font-bold text-lg mb-2">Uso do Plano</h3>
             <div className="w-full h-3 bg-border rounded-full mb-2">
@@ -165,16 +140,26 @@ export default function PerfilUltraPremiumComHistorico() {
         {/* Cards de Dados Pessoais e Pagamento */}
         <motion.div layout className="grid sm:grid-cols-2 gap-6">
           <div className="bg-surface/70 backdrop-blur-lg border border-border rounded-3xl shadow-xl p-6">
-            <h2 className="font-semibold text-lg mb-2 flex items-center gap-2"><User className="text-primary"/> Dados Pessoais</h2>
-            <p><strong>Telefone:</strong> {user.telefone}</p>
-            <p><strong>Carro:</strong> {user.carro}</p>
-            <p><strong>Placa:</strong> {user.placa}</p>
+            <h2 className="font-semibold text-lg mb-2 flex items-center gap-2"><User className="text-primary" /> Dados Pessoais</h2>
+            <p><strong>Telefone:</strong> {user.phone}</p>
+            <p><strong>Total de Veiculos:</strong> {user.vehicles.length}</p>
+            <p><strong>Placas:</strong> {user.vehicles.map((v) => v.plate).join("  |  ")}</p>
+            <p className="">
+              <strong>Conta criada em:</strong>{" "}
+              {user.createdAt
+                ? new Date(user.createdAt).toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+                : "Data não informada"}
+            </p>
           </div>
           <div className="bg-surface/70 backdrop-blur-lg border border-border rounded-3xl shadow-xl p-6">
-            <h2 className="font-semibold text-lg mb-2 flex items-center gap-2"><CreditCard className="text-primary"/> Método de Pagamento</h2>
-            <p><strong>Forma:</strong> {user.pagamento.metodo}</p>
+            <h2 className="font-semibold text-lg mb-2 flex items-center gap-2"><CreditCard className="text-primary" /> Método de Pagamento</h2>
+            {/* <p><strong>Forma:</strong> {user.pagamento.metodo}</p>
             <p><strong>Cartão:</strong> **** **** **** {user.pagamento.finalCartao}</p>
-            <p><strong>Validade:</strong> {user.pagamento.validade}</p>
+            <p><strong>Validade:</strong> {user.pagamento.validade}</p> */}
             <button
               onClick={handleAlterarPagamento}
               className="mt-4 bg-primary text-surface py-2 px-4 rounded-xl hover:bg-primary-hover transition"
@@ -186,7 +171,7 @@ export default function PerfilUltraPremiumComHistorico() {
 
         {/* Histórico */}
         <motion.div layout className="bg-surface/70 backdrop-blur-lg border border-border rounded-3xl shadow-xl p-6">
-          <h2 className="font-semibold text-lg mb-4 flex items-center gap-2"><CalendarCheck className="text-primary"/> Histórico de Serviços</h2>
+          <h2 className="font-semibold text-lg mb-4 flex items-center gap-2"><CalendarCheck className="text-primary" /> Histórico de Serviços</h2>
           <div className="overflow-y-auto max-h-80">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -219,7 +204,7 @@ export default function PerfilUltraPremiumComHistorico() {
             onClick={handleLogout}
             className="flex items-center gap-2 bg-red-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-red-700 transition"
           >
-            <LogOut size={18}/> Sair da Conta
+            <LogOut size={18} /> Sair da Conta
           </button>
         </div>
       </div>

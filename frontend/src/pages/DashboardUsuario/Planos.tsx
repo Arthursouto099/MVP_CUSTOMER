@@ -1,72 +1,19 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, SprayCan, Loader2, Star } from "lucide-react";
+import type { Service } from "../../api/@service/service.type";
+import ServiceHttpActions from "../../api/@service/service.axios";
 // import ServicoHttpActions from "../api/@servico/servico.axios"; // Futuro: Axios
 
 // =========================
 // Tipagem dos serviços/planos
 // =========================
-interface Servico {
-  id: string;
-  nome: string;
-  descricao?: string;          // Opcional para planos
-  preco: number;
-  duracao: string;             // "40 min" ou "mensal"
-  categoria?: string;          // Opcional, só para avulsos
-  tipo: "avulso" | "assinatura";
-  beneficios?: string[];       // Só para assinaturas
-}
+
 
 // =========================
 // MOCK DE SERVIÇOS E PLANOS
 // =========================
-const MOCK_SERVICOS: Servico[] = [
-  {
-    id: "1",
-    nome: "Lavagem Completa",
-    descricao: "Lavagem externa, interna e enceramento leve.",
-    preco: 59.9,
-    duracao: "40 min",
-    categoria: "lavagem",
-    tipo: "avulso",
-  },
-  {
-    id: "2",
-    nome: "Higienização Interna",
-    descricao: "Limpeza profunda de bancos e estofados.",
-    preco: 89.9,
-    duracao: "1h 10min",
-    categoria: "higienizacao",
-    tipo: "avulso",
-  },
-  {
-    id: "bronze",
-    nome: "Bronze",
-    preco: 49.9,
-    duracao: "mensal",
-    categoria: "assinatura",
-    tipo: "assinatura",
-    beneficios: ["2 lavagens simples/mês", "10% off extras"],
-  },
-  {
-    id: "prata",
-    nome: "Prata",
-    preco: 89.9,
-    duracao: "mensal",
-    categoria: "assinatura",
-    tipo: "assinatura",
-    beneficios: ["4 lavagens completas", "Prioridade no agendamento"],
-  },
-  {
-    id: "ouro",
-    nome: "Ouro",
-    preco: 149.9,
-    duracao: "mensal",
-    categoria: "assinatura",
-    tipo: "assinatura",
-    beneficios: ["Lavagens ilimitadas", "Brinde mensal", "Suporte VIP"],
-  },
-];
+
 
 // =========================
 // Componente ServicosEPlanosPremium
@@ -75,7 +22,7 @@ export default function ServicosEPlanosPremium() {
   // =========================
   // Estados
   // =========================
-  const [servicos, setServicos] = useState<Servico[]>([]);
+  const [servicos, setServicos] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // =========================
@@ -90,31 +37,13 @@ export default function ServicosEPlanosPremium() {
   useEffect(() => {
     const fetchServicos = async () => {
       setIsLoading(true);
-      try {
-        // =========================
-        // API Axios: buscar serviços e planos
-        // =========================
-        // const response = await ServicoHttpActions.getAll();
-        // if (response?.data) {
-        //   setServicos(response.data);
-        // } else {
-        //   setServicos(MOCK_SERVICOS);
-        // }
-
-        // =========================
-        // Mock fallback
-        // =========================
-        setTimeout(() => {
-          setServicos(MOCK_SERVICOS);
-          setIsLoading(false);
-        }, 800);
-
-      } catch (err: any) {
-        console.error("Erro ao buscar serviços, usando mock:", err);
-        setServicos(MOCK_SERVICOS);
-        setIsLoading(false);
+      
+        
+        const response = await ServiceHttpActions.getServices({page: 1,limit: 40});
+        
+        setIsLoading(false)
+        setServicos(response.data ?? []);
       }
-    };
 
     fetchServicos();
   }, []);
@@ -130,8 +59,8 @@ export default function ServicosEPlanosPremium() {
   // =========================
   // Filtragem de serviços e planos
   // =========================
-  const servicosAvulsos = servicos.filter((s) => s.tipo === "avulso");
-  const planos = servicos.filter((s) => s.tipo === "assinatura");
+  const servicosAvulsos = servicos.filter((s) => s.type === "AVULSO");
+  const planos = servicos.filter((s) => s.type === "ASSINATURA");
 
   // =========================
   // Renderização
@@ -149,18 +78,17 @@ export default function ServicosEPlanosPremium() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {servicosAvulsos.map((s) => (
             <motion.div
-              key={s.id}
+              key={s.id_service}
               whileHover={{ scale: 1.05, y: -5 }}
               className="bg-surface border border-border rounded-3xl shadow-lg p-6 flex flex-col justify-between transition-transform"
             >
-              <h2 className="text-2xl font-bold mb-2 text-text-primary">{s.nome}</h2>
-              <p className="text-text-secondary mb-4 text-sm">{s.descricao}</p>
+              <h2 className="text-2xl font-bold mb-2 text-text-primary">{s.name}</h2>
+              <p className="text-text-secondary mb-4 text-sm">{s.description}</p>
               <div className="flex justify-between items-center mb-4">
-                <span className="text-lg font-bold text-primary">R$ {s.preco.toFixed(2)}</span>
-                <span className="text-sm text-text-muted">{s.duracao}</span>
+                <span className="text-lg font-bold text-primary">R$ {Number(s.price).toFixed(2)}</span>
               </div>
               <button
-                onClick={() => handleAgendar(s.id)}
+                onClick={() => handleAgendar(s.id_service ?? "")}
                 className="bg-primary text-surface py-2 rounded-xl font-semibold hover:bg-primary-hover transition"
               >
                 Agendar
@@ -179,15 +107,15 @@ export default function ServicosEPlanosPremium() {
         </h1>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {planos.map((p) => {
-            const isPremium = p.nome === "Prata" || p.nome === "Ouro";
+            const isPremium = p.typePlan === "PRATA" || p.typePlan === "OURO";
             return (
               <motion.div
-                key={p.id}
+                key={p.id_service}
                 whileHover={{ scale: 1.05, y: -5 }}
                 className={`relative rounded-3xl shadow-2xl p-8 flex flex-col justify-between transition-transform
-                  ${p.nome === "Prata" ? "bg-secondary text-surface" : ""}
-                  ${p.nome === "Ouro" ? "bg-warning text-surface" : ""}
-                  ${p.nome === "Bronze" ? "bg-surface text-text-primary border border-border" : ""}`}
+                  ${p.typePlan === "PRATA" ? "bg-secondary text-surface" : ""}
+                  ${p.typePlan === "OURO" ? "bg-warning text-surface" : ""}
+                  ${p.typePlan === "BRONZE" ? "bg-surface text-text-primary border border-border" : ""}`}
               >
                 {/* Badge VIP */}
                 {isPremium && (
@@ -196,20 +124,14 @@ export default function ServicosEPlanosPremium() {
                   </div>
                 )}
 
-                <h2 className="text-3xl font-bold mb-3">{p.nome}</h2>
+                <h2 className="text-3xl font-bold mb-3">{p.name}</h2>
                 <p className="text-4xl font-extrabold mb-4">
-                  R$ {p.preco.toFixed(2)}{" "}
+                  R$ {Number(p.price).toFixed(2)}{" "}
                   <span className="text-sm font-medium">/ mês</span>
                 </p>
-                <ul className="mb-6 text-left space-y-2">
-                  {p.beneficios?.map((b, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <CheckCircle className="text-success" size={18} /> {b}
-                    </li>
-                  ))}
-                </ul>
+                
                 <button
-                  onClick={() => handleSubscribe(p.id)}
+                  onClick={() => handleSubscribe(p.id_service ?? "")}
                   className={`py-3 rounded-xl font-bold shadow-lg transition
                     ${isPremium ? "bg-surface text-primary hover:bg-surface/90" : "bg-primary text-surface hover:bg-primary-hover"}`}
                 >

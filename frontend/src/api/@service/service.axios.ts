@@ -1,54 +1,24 @@
 import axios, { isAxiosError } from "axios";
 import AxiosInstance from "../@instance/AxiosInstance";
-import type { Customer } from "./customer.type";
+import type { Service } from "./service.type";
 
 
 // instancia do axios para requisições do customer
-const customerInstance = axios.create({baseURL: `${AxiosInstance.defaults.baseURL}/customer`})
+const serviceInstane = axios.create({baseURL: `${AxiosInstance.defaults.baseURL}/services`})
 
 
 
-const CustomerHttpActions = {
+const ServiceHttpActions = {
 
-createCustomer: async ({data}: {data: Customer}) => {
+createService: async ({data}: {data: Service}) => {
     try {
-        const createCustomer = await customerInstance.post("/create", data)
+        const createCustomer = await serviceInstane.post("/create", data)
         console.log(createCustomer)
 
 
         return {
             message: createCustomer.data.message,
-            data: createCustomer.data.data as Customer,
-            success: true 
-        }
-    }
-    catch(e) {
-        
-        if(isAxiosError(e)) {
-        return {
-            message: e.message,
-            error: e.cause,
-            stack: e.stack,
-            success: true
-        }
-        }
-
-        return {
-            message: "Error não esperado...",
-            success: true
-        }
-    }
-
-},
-loginCustomer: async ({email, password}: {email: string, password: string}) => {
-    try {
-        const login = await customerInstance.post("/login", {email, password})
-        console.log(login)
-
-
-        return {
-            message: login.data.message,
-            data: login.data.data.token as string,
+            data: createCustomer.data.data as Service,
             success: true 
         }
     }
@@ -71,45 +41,45 @@ loginCustomer: async ({email, password}: {email: string, password: string}) => {
 
 },
 
-updateCustomer: async ({data, id_customer}: {data: Partial<Customer>, id_customer: string}) => {
+updateService: async ({data, id_service}: {data: Partial<Service>, id_service: string}) => {
     try {
-        const updateCustomer = await customerInstance.put(`/update/${id_customer}`, data)
+        const updateCustomer = await serviceInstane.put(`/update/${id_service}`, data)
+        console.log(updateCustomer)
+
+
+        return {
+            message: updateCustomer.data.message,
+            data: updateCustomer.data.data as Service,
+            success: true 
+        }
+    }
+    catch(e) {
+        
+        if(isAxiosError(e)) {
+        return {
+            message: e.message,
+            error: e.cause,
+            stack: e.stack,
+            success: true
+        }
+        }
+
+        return {
+            message: "Error não esperado...",
+            success: true
+        }
+    }
+
+},
+deleteService: async ({ id_service}: { id_service: string}) => {
+    try {
+        const updateCustomer = await serviceInstane.delete(`/delete/${id_service}`)
         
 
 
         return {
             message: updateCustomer.data.message,
-            data: updateCustomer.data.data as Customer,
-            success: true 
-        }
-    }
-    catch(e) {
-        
-        if(isAxiosError(e)) {
-        return {
-            message: e.message,
-            error: e.cause,
-            stack: e.stack,
-            success: true
-        }
-        }
-
-        return {
-            message: "Error não esperado...",
-            success: true
-        }
-    }
-
-},
-deleteCustomer: async ({ id_customer}: { id_customer: string}) => {
-    try {
-        const updateCustomer = await customerInstance.delete(`/delete/${id_customer}`)
-        
-
-
-        return {
-            message: updateCustomer.data.message,
-            data: updateCustomer.data.data as Customer,
+            data: updateCustomer.data.data as Service,
             success: true 
         }
     }
@@ -132,15 +102,15 @@ deleteCustomer: async ({ id_customer}: { id_customer: string}) => {
 
 },
 
-getCustomers: async ( {page, limit} :{page: number, limit: number}) => {
+getServices: async ( {page, limit} :{page: number, limit: number}) => {
     try {
-        const findCustomers = await customerInstance.get(`/all?page=${page}&limit=${limit}`)
+        const findCustomers = await serviceInstane.get(`/all?page=${page}&limit=${limit}`)
         console.log(findCustomers)
 
 
         return {
             message: findCustomers.data.message,
-            data: findCustomers.data.data as Customer[],
+            data: findCustomers.data.data as Service[],
             success: true 
         }
     }
@@ -162,15 +132,15 @@ getCustomers: async ( {page, limit} :{page: number, limit: number}) => {
     }
 
 },
-getCustomer: async ({id_customer}: {id_customer: string}) => {
+getService: async ({id_service}: {id_service: string}) => {
     try {
-        const findCustomers = await customerInstance.get(`/${id_customer}`)
-        console.log(findCustomers)
+        const service = await serviceInstane.get(`/${id_service}`)
+        console.log(service)
 
 
         return {
-            message: findCustomers.data.message,
-            data: findCustomers.data.data as Customer,
+            message: service.data.message,
+            data: service.data.data as Service,
             success: true 
         }
     }
@@ -197,4 +167,4 @@ getCustomer: async ({id_customer}: {id_customer: string}) => {
 }
 
 
-export default CustomerHttpActions
+export default ServiceHttpActions

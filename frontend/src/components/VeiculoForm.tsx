@@ -1,45 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import type { Vehicle } from "../api/@vehicle/vehicle.type";
 
-interface Veiculo {
-  id?: string;
-  tipo: "Carro" | "Moto" | "Caminhão" | "Outro";
-  modelo: string;
-  placa: string;
-  ano: number;
-}
+
 
 interface VeiculoFormProps {
-  veiculo: Veiculo | null;
-  onSubmit: (v: Veiculo) => void;
+  veiculo: Vehicle | null;
+  onSubmit: (v: Vehicle) => void;
   onClose: () => void;
 }
 
-const TIPOS: Veiculo["tipo"][] = ["Carro", "Moto", "Caminhão", "Outro"];
+const TIPOS: Vehicle["type"][] = ["CARRO", "MOTO", "CAMINHAO", "OUTRO"];
 
 export default function VeiculoForm({ veiculo, onSubmit, onClose }: VeiculoFormProps) {
-  const [tipo, setTipo] = useState<Veiculo["tipo"]>(veiculo?.tipo || "Carro");
-  const [modelo, setModelo] = useState(veiculo?.modelo || "");
-  const [placa, setPlaca] = useState(veiculo?.placa || "");
-  const [ano, setAno] = useState(veiculo?.ano || new Date().getFullYear());
+  const [tipo, setTipo] = useState<Vehicle["type"]>(veiculo?.type || "CARRO");
+  const [modelo, setModelo] = useState(veiculo?.model || "");
+  const [placa, setPlaca] = useState(veiculo?.plate || "");
+  const [ano, setAno] = useState(veiculo?.year || new Date().getFullYear());
   const [erro, setErro] = useState("");
 
   // Validar campos antes de enviar
-  const handleSubmit = () => {
-    if (!modelo || !placa || !ano) {
-      setErro("Todos os campos são obrigatórios.");
-      return;
-    }
-    setErro("");
-    onSubmit({
-      id: veiculo?.id || Date.now().toString(),
-      tipo,
-      modelo,
-      placa,
-      ano,
-    });
-  };
+const handleSubmit = () => {
+  if (!modelo || !placa || !ano || !tipo) {
+    setErro("Todos os campos são obrigatórios.");
+    return;
+  }
+  setErro("");
+
+  onSubmit({
+    id_vehicle: veiculo?.id_vehicle, 
+    type: tipo,   
+    model: modelo,
+    plate: placa,
+    year: String(ano),
+  });
+};
+
 
   return (
     <motion.div
@@ -68,7 +65,7 @@ export default function VeiculoForm({ veiculo, onSubmit, onClose }: VeiculoFormP
           Tipo
           <select
             value={tipo}
-            onChange={(e) => setTipo(e.target.value as Veiculo["tipo"])}
+            onChange={(e) => setTipo(e.target.value as Vehicle["type"])}
             className="px-3 py-2 border border-border rounded-xl bg-background text-text-primary focus:ring-2 focus:ring-primary mt-1"
           >
             {TIPOS.map((t) => (

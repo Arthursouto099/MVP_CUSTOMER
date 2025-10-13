@@ -1,78 +1,123 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pencil, Trash2, Plus, Car, Motorbike, Truck, Circle } from "lucide-react";
 import VeiculoForm from "../../components/VeiculoForm";
+import type { Vehicle } from "../../api/@vehicle/vehicle.type";
+import VehicleHttpActions from "../../api/@vehicle/vehicle.axios";
+import { toast } from "sonner";
 
-interface Veiculo {
-  id: string;
-  tipo: "Carro" | "Moto" | "Caminhão" | "Outro";
-  modelo: string;
-  placa: string;
-  ano: number;
-}
+// ======================================
+// Configuração de Tipos e Ícones
+// ======================================
+const TIPOS = ["Todos", "CARRO", "MOTO", "CAMINHAO", "OUTRO"];
 
-const TIPOS = ["Todos", "Carro", "Moto", "Caminhão", "Outro"];
-
-// Cores e ícones por tipo
 const TIPOS_CONFIG: Record<
-  Veiculo["tipo"],
+  Vehicle["type"],
   { cor: string; icon: React.ReactNode }
 > = {
-  Carro: { cor: "bg-blue-500/20", icon: <Car size={28} /> },
-  Moto: { cor: "bg-purple-500/20", icon: <Motorbike size={28} /> },
-  Caminhão: { cor: "bg-yellow-500/20", icon: <Truck size={28} /> },
-  Outro: { cor: "bg-gray-300/20", icon: <Circle size={28} /> },
+  CARRO: { cor: "bg-blue-500/20", icon: <Car size={28} /> },
+  MOTO: { cor: "bg-purple-500/20", icon: <Motorbike size={28} /> },
+  CAMINHAO: { cor: "bg-yellow-500/20", icon: <Truck size={28} /> },
+  OUTRO: { cor: "bg-gray-300/20", icon: <Circle size={28} /> },
 };
 
+// ======================================
+// Componente Principal
+// ======================================
 export default function VeiculosPremium() {
-  const [veiculos, setVeiculos] = useState<Veiculo[]>([
-    { id: "1", tipo: "Carro", modelo: "Gol", placa: "ABC-1234", ano: 2020 },
-    { id: "2", tipo: "Moto", modelo: "Honda CB500", placa: "XYZ-5678", ano: 2022 },
-    { id: "3", tipo: "Caminhão", modelo: "FH Volvo", placa: "TRK-9876", ano: 2019 },
-  ]);
-
+  const [veiculos, setVeiculos] = useState<Vehicle[]>([]);
   const [formOpen, setFormOpen] = useState(false);
-  const [veiculoSelecionado, setVeiculoSelecionado] = useState<Veiculo | null>(null);
+  const [veiculoSelecionado, setVeiculoSelecionado] = useState<Vehicle | null>(null);
   const [filtroTipo, setFiltroTipo] = useState("Todos");
   const [busca, setBusca] = useState("");
+  const [reload, setReload] = useState(false);
 
+  // ===============================
+  // Carregar veículos
+  // ===============================
+  useEffect(() => {
+    const findVehicles = async () => {
+      try {
+        const res = await VehicleHttpActions.getVehicles({ page: 1, limit: 30 });
+        if (res.success) {
+          setVeiculos(res.data ?? []);
+        } else {
+          toast.error(res.message || "Erro ao buscar veículos");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro de conexão com o servidor.");
+      }
+    };
+
+    findVehicles();
+  }, [reload]);
+
+  // ===============================
+  // Handlers principais
+  // ===============================
   const handleNovoVeiculo = () => {
     setVeiculoSelecionado(null);
     setFormOpen(true);
   };
 
-  const handleEditar = (v: Veiculo) => {
+  const handleEditar = (v: Vehicle) => {
     setVeiculoSelecionado(v);
     setFormOpen(true);
   };
 
-  const handleExcluir = (id: string) => {
-    if (confirm("Deseja realmente excluir este veículo?")) {
-      setVeiculos((prev) => prev.filter((v) => v.id !== id));
+  const handleExcluir = async (id: string) => {
+    if (!confirm("Deseja realmente excluir este veículo?")) return;
+
+    try {
+      const res = await VehicleHttpActions.deleteVehicle({ id_vehicle: id });
+      if (res.success) {
+        toast.success("Veículo excluído com sucesso!");
+        setReload((p) => !p);
+      } else {
+        toast.error(res.message || "Falha ao excluir veículo");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro de conexão com o servidor.");
     }
   };
 
-  const handleSalvar = (v: Veiculo) => {
-    setVeiculos((prev) => {
-      const index = prev.findIndex((ve) => ve.id === v.id);
-      if (index >= 0) {
-        const copy = [...prev];
-        copy[index] = v;
-        return copy;
-      }
-      return [...prev, v];
-    });
-    setFormOpen(false);
+  const handleSalvar = async (v: Vehicle) => {
+    try {
+      const res = v.id_vehicle
+        ? await VehicleHttpActions.updateVehicle({
+            id_vehicle: v.id_vehicle,
+            data: v,
+          })
+        : await VehicleHttpActions.createVehicles({ data: v });
+
+      if (res.success) toast.success(res.message);
+      else toast.error(res.message);
+
+      setFormOpen(false);
+      setReload((p) => !p);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao salvar o veículo.");
+    }
   };
 
+  // ===============================
+  // Filtro e busca
+  // ===============================
   const veiculosFiltrados = useMemo(() => {
     return veiculos
-      .filter((v) => filtroTipo === "Todos" || v.tipo === filtroTipo)
-      .filter((v) => v.modelo.toLowerCase().includes(busca.toLowerCase()));
+      .filter((v) => filtroTipo === "Todos" || v.type === filtroTipo)
+      .filter((v) => v.model?.toLowerCase().includes(busca.toLowerCase()));
   }, [veiculos, filtroTipo, busca]);
 
+  // ===============================
+  // Renderização
+  // ===============================
   return (
     <div className="pt-20 p-6">
+      {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold text-text-primary">Veículos</h1>
         <motion.button
@@ -98,6 +143,7 @@ export default function VeiculosPremium() {
             </option>
           ))}
         </select>
+
         <input
           type="text"
           placeholder="Buscar por modelo..."
@@ -111,10 +157,10 @@ export default function VeiculosPremium() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {veiculosFiltrados.map((v) => {
-            const config = TIPOS_CONFIG[v.tipo];
+            const config = TIPOS_CONFIG[v.type];
             return (
               <motion.div
-                key={v.id}
+                key={v.id_vehicle}
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -128,15 +174,16 @@ export default function VeiculosPremium() {
                       onClick={() => handleEditar(v)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-1 bg-secondary text-surface px-3 py-1 rounded-xl hover:bg-secondary-hover transition"
+                      className="bg-secondary text-surface p-2 rounded-xl hover:bg-secondary-hover transition"
                     >
                       <Pencil size={16} />
                     </motion.button>
+
                     <motion.button
-                      onClick={() => handleExcluir(v.id)}
+                      onClick={() => handleExcluir(v.id_vehicle ?? "")}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex items-center gap-1 bg-error text-surface px-3 py-1 rounded-xl hover:bg-error-hover transition"
+                      className="bg-error text-surface p-2 rounded-xl hover:bg-error-hover transition"
                     >
                       <Trash2 size={16} />
                     </motion.button>
@@ -144,9 +191,11 @@ export default function VeiculosPremium() {
                 </div>
 
                 <div className="space-y-1">
-                  <p className="font-bold text-lg text-text-primary">{v.modelo}</p>
-                  <p className="text-text-secondary">{v.placa}</p>
-                  <p className="text-text-secondary">{v.tipo} - {v.ano}</p>
+                  <p className="font-bold text-lg text-text-primary">{v.model || "Sem modelo"}</p>
+                  <p className="text-text-secondary">{v.plate || "Sem placa"}</p>
+                  <p className="text-text-secondary">
+                    {v.type} {v.year ? `- ${v.year}` : ""}
+                  </p>
                 </div>
               </motion.div>
             );
@@ -164,7 +213,7 @@ export default function VeiculosPremium() {
             exit={{ opacity: 0 }}
           >
             <VeiculoForm
-              veiculo={veiculoSelecionado} // aqui aceitamos undefined para novo veículo
+              veiculo={veiculoSelecionado ?? null}
               onSubmit={handleSalvar}
               onClose={() => setFormOpen(false)}
             />

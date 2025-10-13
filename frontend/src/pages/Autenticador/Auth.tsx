@@ -2,15 +2,20 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import ClienteFormData from "../../components/ClientFormData"; // ajuste o caminho se necessário
+import CustomerHttpActions from "../../api/@customer/customer.axios";
+import { useNavigate } from "react-router-dom";
 // import axios from "axios"; // descomente se for usar API
 
 export default function AuthPage() {
   /* ======================
      ESTADOS LOCAIS
   ====================== */
+
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", senha: "" });
   const [isModalOpen, setIsModalOpen] = useState(false); // controla modal de cadastro
+
+  const navigate = useNavigate()
 
   /* ======================
      FUNÇÕES DE CONTROLE DE FORM
@@ -47,11 +52,10 @@ export default function AuthPage() {
     */
 
     // Simulação de login temporário
-    setTimeout(() => {
-      setLoading(false);
-      alert("Login realizado!");
-      setForm({ email: "", senha: "" });
-    }, 1000);
+    const login = await CustomerHttpActions.loginCustomer({email: form.email, password: form.senha})
+    localStorage.setItem("token", login.data ?? "")
+    
+    navigate("/perfil")
   };
 
   /* ======================

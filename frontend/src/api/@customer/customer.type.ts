@@ -1,3 +1,4 @@
+import type { Vehicle } from "../@vehicle/vehicle.type";
 
 
 
@@ -14,6 +15,7 @@ export type Customer = {
     priority?: "VIP" | "REGULAR" | "NOVO"
     plan?: "BRONZE" | "PRATA" | "OURO"
     obs?: string
+    vehicles: Vehicle[]
 } 
 
 

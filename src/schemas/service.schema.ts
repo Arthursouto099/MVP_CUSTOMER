@@ -11,6 +11,8 @@ export const ServiceSchema = z.object({
   service_type: z.string().min(1, "O tipo de serviço é obrigatório"),
   price: z.union([z.number(),z.string().regex(/^\d+(\.\d{1,2})?$/, "Preço deve ser um número válido"),]),
   checkOutDate: z.coerce.date().optional(),
+  type: z.enum(["AVULSO", "ASSINATURA"]),
+  typePlan: z.enum(["PRATA", "OURO", "BRONZE", "AVULSO"])
 });
 
 

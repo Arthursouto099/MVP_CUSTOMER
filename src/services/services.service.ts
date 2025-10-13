@@ -30,6 +30,15 @@ const ServicesService = {
         }
     },
 
+     findAllService: async ({id_service}: {id_service: string}) => {
+        try{
+            return await prisma.service.findUnique({where: {id_service}})
+        }
+        catch(e) {
+            throw errorHandlerReturn(e, ServiceError)
+        }
+    },
+
 
     updateService: async ({id_service, data} : {id_service: string, data: Prisma.ServiceUpdateInput}) => {
         try{
