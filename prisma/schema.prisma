@@ -27,8 +27,9 @@ model Customer {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt @default(now())
   obs String? 
-  vehicles Vehicle[]  
-   
+  vehicles Vehicle[]
+  planoId     String?    // <- FK para Plano
+  plano       Plano?     @relation(fields: [planoId], references: [id_plan])
 }
 
 enum Plan {
@@ -92,6 +93,24 @@ model  Vehicle {
   model String
   plate String
   year String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Plano {
+  id_plan String @id @default(uuid())
+  name String
+  price Decimal
+  customers Customer[]
+}
+
+model Subscription {
+  id_subscription String @id @default(uuid())
+  id_plan String
+  id_mpPreapprovalId String
+  price Decimal
+  name_plano String
+  Status_subscription String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 }
