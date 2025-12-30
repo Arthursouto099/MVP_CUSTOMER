@@ -1,14 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import ClienteLayout from "./layouts/ClienteLayout/ClienteLayout";
-
 import AuthPage from "./pages/Autenticador/Auth";
-
 import Home from "./pages/DashboardAdmin/Home/Home";
 import ClientesList from "./pages/DashboardAdmin/ClientList/ClientList";
 import Configuracoes from "./pages/DashboardAdmin/Config/Configuracoes";
 import ServicosList from "./pages/DashboardAdmin/Servicos/ServicosList/ServicosList";
-
 import Planos from "./pages/DashboardUsuario/Planos";
 import Agendamentos from "./pages/DashboardUsuario/Agendamento";
 import Perfil from "./pages/DashboardUsuario/Perfil";

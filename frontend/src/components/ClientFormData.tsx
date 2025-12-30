@@ -95,13 +95,13 @@ export default function ClienteForm({ isOpen, onClose, id_customer }: ClienteFor
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center bg-color-transpa/40 backdrop-blur-sm z-50"
+          className="absolute inset-0  flex items-center justify-center bg-color-transpa/40 backdrop-blur-sm z-50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="rounded-2xl shadow-xl w-full max-w-2xl p-0 overflow-hidden border border-border bg-surface"
+            className="rounded-2xl  shadow-xl w-full max-w-2xl p-0 overflow-hidden border border-border bg-surface"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
